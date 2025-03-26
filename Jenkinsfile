@@ -1,35 +1,19 @@
-pipeline {
-    agent any
+node {
+    def branchName = env.BRANCH_NAME ?: 'unknown'  // Default to 'unknown' if null
+    def app
 
-    environment {
-        DOCKER_IMAGE = "magdalena18/kiii-jenkins"
-        DOCKER_CREDENTIALS = "dockerhub"  
-        DOCKER_REGISTRY = "https://registry.hub.docker.com"
+    stage('Clone repository') {
+        checkout scm
     }
 
-    stages {
-        stage('Clone repository') {
-            steps {
-                checkout scm
-            }
-        }
+    stage('Build image') {
+        app = docker.build("magdalena18/kiii-jenkins")
+    }
 
-        stage('Build and Push Image') {
-            when {
-                branch 'dev'  // Runs only if the branch is 'dev'
-            }
-            steps {
-                script {
-                    echo "Building Docker image..."
-                    app = docker.build("${DOCKER_IMAGE}")
-
-                    echo "Pushing Docker image to Docker Hub..."
-                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_CREDENTIALS) {
-                        app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
-                        app.push("${env.BRANCH_NAME}-latest")
-                    }
-                }
-            }
+    stage('Push image') {
+        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+            app.push("${branchName}-${env.BUILD_NUMBER}")
+            app.push("${branchName}-latest")
         }
     }
 }
