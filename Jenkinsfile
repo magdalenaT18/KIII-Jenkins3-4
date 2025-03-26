@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "magdalena18/kiii-jenkins"
-        DOCKER_CREDENTIALS = "dockerhub"  // Ensure this exists in Jenkins credentials
+        DOCKER_CREDENTIALS = "dockerhub"  
         DOCKER_REGISTRY = "https://registry.hub.docker.com"
     }
 
